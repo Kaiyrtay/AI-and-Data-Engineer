@@ -1,25 +1,30 @@
-# Week 7 - 8
+# Error Handling Demo
 
-Covers: dict, set, nested, conditional comprehensions.
+This project shows structured error handling in Python using **custom exceptions** and `try/except/else/finally`.
 
----
+## Features
 
-## Tasks & Solutions
+- Custom exceptions with codes & context:
+  - **Database**: `ConnectionError`, `QueryError`
+  - **Network**: `TimeoutError`, `BadResponseError`
+  - **Validation**: `MissingFieldError`, `TypeMismatch`
+- Catch specific or generic errors.
+- Works with built-in exceptions like `ZeroDivisionError` and `ValueError`.
 
-| #   | Task                                                           | Solved |
-| --- | -------------------------------------------------------------- | ------ |
-| 1   | Build dict of word → length, skip words shorter than 4 letters | ✅     |
-| 2   | Dict of number → square for numbers in both lists              | ✅     |
-| 3   | Flatten matrix into a set                                      | ✅     |
-| 4   | Set of unique words from all sentences, lowercased             | ✅     |
-| 5   | Invert dict, skip None values                                  | ✅     |
-| 6   | Dict of number → "even" or "odd"                               | ✅     |
-| 7   | Dict of character → count, letters only                        | ✅     |
-| 8   | Flat set of all numbers > 5 from nested list                   | ✅     |
-| 9   | Multiplication table as dict of (i, j) → i\*j                  | ✅     |
-| 10  | Dict of name → score, only score >= 50                         | ✅     |
-| 11  | All pairs (a, b) where a < b and a + b is even → set           | ✅     |
-| 12  | Countries with population > 100M, rounded to nearest million   | ✅     |
-| 13  | Transpose matrix using nested comprehension, no zip            | ✅     |
-| 14  | Dict of word → reversed word, skip palindromes                 | ✅     |
-| 15  | Keys in both dicts → sum of values                             | ✅     |
+## Usage
+
+```python
+try:
+    raise MissingFieldError("age", "int")
+except AppError as e:
+    log.error(f"Caught {type(e).__name__}: {e} [code={e.code}]")
+```
+
+## Example Output
+
+```
+ERROR | Caught MissingFieldError: Missing field 'age' (expected int) [code=3001]
+Processing 5... Success! Result is 2.0
+Processing 0... ZeroDivisionError caught: Can't divide by zero
+Processing -3... ValueError caught: Negative number not allowed
+```
