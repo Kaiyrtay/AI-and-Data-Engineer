@@ -1,31 +1,25 @@
 # Week 7 - 8
 
-Rules: use ONLY `lambda`, `map`, `filter`, `reduce`. No loops. No list comprehensions.
+Covers: dict, set, nested, conditional comprehensions.
 
 ---
 
 ## Tasks & Solutions
 
-| #     | Task                                                 | Solved |
-| ----- | ---------------------------------------------------- | ------ |
-| 1     | Flatten nested list, keep odds, return squares       | ✅     |
-| 2     | Count word frequency → dict                          | ✅     |
-| 3     | Apply list of functions one after another to a value | ✅     |
-| 4     | Group numbers by remainder divided by 3 → dict       | ✅     |
-| 5     | Transpose a matrix                                   | ✅     |
-| 6     | Filter valid emails                                  | ✅     |
-| 7     | Running cumulative sum                               | ✅     |
-| 8     | Deep flatten any nested list                         | ✅     |
-| 9     | Caesar cipher — shift letters by 3                   | ✅     |
-| 10    | Cartesian pairs where product > 10 and both odd      | ✅     |
-| 11    | Swap dict keys and values                            | ✅     |
-| 12    | Zip two lists into a dict without `dict()`           | ✅     |
-| 13    | Find all duplicates in a list                        | ✅     |
-| 14    | Normalize list to 0–1 range                          | ⬜     |
-| 15    | Chunk list into N-sized pieces                       | ⬜     |
-| 16    | Flatten a dict of lists into one list                | ⬜     |
-| 17    | Find the longest word                                | ⬜     |
-| 18    | Chain multiple filter conditions                     | ⬜     |
-| 19    | Multiplication table as flat list                    | ⬜     |
-| 20    | Histogram with reduce only                           | ⬜     |
-| BONUS | Filter primes → square → sum in one expression       | ⬜     |
+| #   | Task                                                           | Solved |
+| --- | -------------------------------------------------------------- | ------ |
+| 1   | Build dict of word → length, skip words shorter than 4 letters | ✅     |
+| 2   | Dict of number → square for numbers in both lists              | ✅     |
+| 3   | Flatten matrix into a set                                      | ✅     |
+| 4   | Set of unique words from all sentences, lowercased             | ✅     |
+| 5   | Invert dict, skip None values                                  | ✅     |
+| 6   | Dict of number → "even" or "odd"                               | ✅     |
+| 7   | Dict of character → count, letters only                        | ✅     |
+| 8   | Flat set of all numbers > 5 from nested list                   | ✅     |
+| 9   | Multiplication table as dict of (i, j) → i\*j                  | ✅     |
+| 10  | Dict of name → score, only score >= 50                         | ✅     |
+| 11  | All pairs (a, b) where a < b and a + b is even → set           | ✅     |
+| 12  | Countries with population > 100M, rounded to nearest million   | ✅     |
+| 13  | Transpose matrix using nested comprehension, no zip            | ✅     |
+| 14  | Dict of word → reversed word, skip palindromes                 | ✅     |
+| 15  | Keys in both dicts → sum of values                             | ✅     |
