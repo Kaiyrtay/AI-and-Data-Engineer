@@ -1,0 +1,3 @@
+##################### 2 Section : Data Structure and Algorithms #####################
+https://medium.com/@erkmenefe/a-comprehensive-guide-to-arrays-understanding-static-dynamic-arrays-and-ram-storage-255226aed0c7
+https://www.geeksforgeeks.org/dsa/difference-between-static-arrays-and-dynamic-arrays/
