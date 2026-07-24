@@ -4,10 +4,10 @@ A self-directed path toward AI/data engineering that starts from solid software 
 
 ## Structure
 
-| Folder | Focus |
-| --- | --- |
-| [`1 Python OOP/`](./1%20Python%20OOP/README.md) | Classes → inheritance → SOLID design → two capstone projects |
-| [`2 Data Structure and Algorithms/`](./2%20Data%20Structure%20and%20Algorithms/README.md) | Arrays and linked lists, built from scratch |
+| Folder                                                                                    | Focus                                                        |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [`1 Python OOP/`](./1%20Python%20OOP/README.md)                                           | Classes → inheritance → SOLID design → two capstone projects |
+| [`2 Data Structure and Algorithms/`](./2%20Data%20Structure%20and%20Algorithms/README.md) | Arrays and linked lists, built from scratch                  |
 
 Each folder has its own README with a full breakdown of what's inside.
 
@@ -17,4 +17,4 @@ Weekly cadence, project-based — every topic ends in working code, not just not
 
 ## Guiding philosophy
 
-`The Zen of Python.txt` sits at the root as a reminder of the principles behind the code style used throughout: explicit over implicit, simple over complex, readable over clever.
+`The Zen of Python.txt` sits at the root as a reminder of the principles behind the code style used throughout: explicit over implicit, simple over complex, readable over clever...
