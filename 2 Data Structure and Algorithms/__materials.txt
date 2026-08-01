@@ -4,3 +4,4 @@ https://www.geeksforgeeks.org/dsa/difference-between-static-arrays-and-dynamic-a
 https://coderpad.io/blog/development/an-introduction-to-linked-list-data-structures/
 https://medium.com/@noorfatimaafzalbutt/hashing-in-data-structures-and-algorithms-dsa-6f68dfbaec29
 https://www.kdkce.edu.in/pdf/YDC-4IT-ADS-Hashing%20Techniques.pdf
+https://medium.com/@moradi.sayyedali/stack-data-structure-3b2eca5f37ca

@@ -1,6 +1,6 @@
 # Data Structures & Algorithms
 
-Five data structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
+Six structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; the last, `Stack`, is an abstract data type layered on top of them in two backings. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
 
 ## Contents
 
@@ -11,6 +11,7 @@ Five data structures, built from scratch in pure Python — no wrapping `list`, 
 | `SinglyLinkedList.py` | Singly linked list       | `Node` with `.next` only              | Yes — unbounded                             |
 | `DoublyLinkedList.py` | Doubly linked list       | `Node` with `.next` and `.prev`       | Yes — unbounded                             |
 | `HashTable.py`        | Hash table (set of keys) | Prime-sized slot array / bucket lists | Yes — rehashes at 0.75 load factor          |
+| `Stack.py`            | Stack (LIFO), array- & linked-backed | Resizable buffer / singly linked list | Yes — array doubles; linked is unbounded    |
 
 ---
 
@@ -53,6 +54,15 @@ Four collision-handling techniques behind one abstract interface. `HashTable` (a
 
 Deletion uses tombstones (a `_DELETED` sentinel) so removing a key never severs a probe chain: search treats a tombstone as occupied and keeps going, while insert is free to reuse it. The table holds a **prime** capacity and rehashes every live key into the next prime once the load factor reaches 0.75, which keeps operations near O(1). Being a set of keys, it supports the container dunders except `__getitem__`/`__setitem__`, which don't apply to unordered keys. Run `python HashTable.py` to execute the built-in self-tests — empty / one / many-with-resize / duplicate / delete-and-reinsert / invalid input / deliberate failure, across all four techniques.
 
+## Stack
+
+One LIFO contract, two backings. `Stack` (an ABC) fixes the interface — `push`, `pop`, `peek`, `__len__`, `__repr__`, plus a shared `is_empty` and `__str__` — and two classes fill it in differently:
+
+- `ArrayStack` — a contiguous, resizable buffer. `_count` does double duty as the item count **and** the index of the next free slot, so the top always sits at `_count - 1`. `push` fills the free slot and doubles the buffer (`_resize`) when it runs out, making append amortized O(1); `pop` clears the vacated slot so its reference can be garbage-collected.
+- `LinkedStack` — composition over a hand-rolled `Node`/`LinkedList`, pushing and popping at the head. Every operation is true O(1) with no resize, and it can never be "full". `pop`/`peek` hand back the `Node`; `pop_value`/`peek_value` return just the stored value.
+
+Errors are specific — `StackEmptyError` on an empty `pop`/`peek`, `StackFullError` reserved for a fixed-capacity variant — all under a `StackError` base, so callers catch precisely instead of a bare `except`. Because both stacks satisfy the same interface, any caller that depends on the contract works with either; swapping `ArrayStack` for `LinkedStack` changes nothing else.
+
 ---
 
 ## Complexity
@@ -78,6 +88,15 @@ Deletion uses tombstones (a `_DELETED` sentinel) so removing a key never severs 
 | Space     | O(n)    | O(n) — chaining adds per-node list overhead; probing stays in one array |
 
 The 0.75 resize threshold and prime sizing are what keep the average at O(1); adversarial hashing or a pathological load is what pushes any of the four to O(n).
+
+`Stack` is an ADT, not an indexed sequence, so like `HashTable` it gets its own line — every operation touches only the top:
+
+| Operation      | ArrayStack                          | LinkedStack     |
+| -------------- | ----------------------------------- | --------------- |
+| push           | O(1) amortized — doubles when full  | O(1)            |
+| pop            | O(1)                                | O(1)            |
+| peek           | O(1)                                | O(1)            |
+| Space overhead | unused buffer capacity              | 1 pointer/node  |
 
 ## Background reading
 
