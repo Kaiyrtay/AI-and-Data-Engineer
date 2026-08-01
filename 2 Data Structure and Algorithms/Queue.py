@@ -13,6 +13,8 @@ Items enter at the back and leave from the front; neither queue accepts
 (`QueueEmptyError`) so callers can catch precisely instead of a bare `except`.
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 import math
 from typing import Iterator
@@ -334,3 +336,79 @@ class LinkedListQueue(Queue):
 
     def __str__(self) -> str:
         return repr(self)
+
+
+if __name__ == "__main__":
+    # Self-tests — run `python Queue.py`. Each case reports PASS / FAIL / ERROR.
+
+    def _check(name: str, case) -> None:
+        try:
+            case()
+            print(f"  PASS   {name}")
+        except AssertionError as exc:
+            print(f"  FAIL   {name}: {exc}")
+        except Exception as exc:                    # noqa: BLE001 - surface any error
+            print(f"  ERROR  {name}: {type(exc).__name__}: {exc}")
+
+    def array_queue_lifecycle() -> None:
+        q = ArrayQueue(2)                           # small buffer forces resizes
+        assert q.is_empty() and len(q) == 0
+        for i in range(5):                          # 0..4 -> capacity grows 2 -> 4 -> 8
+            q.enqueue(i)
+        assert len(q) == 5
+        assert q.peek() == 0                        # FIFO: first in is at the front
+        assert q.dequeue() == 0 and len(q) == 4
+        assert q.to_array() == [1, 2, 3, 4]
+        assert list(q) == [1, 2, 3, 4]             # __iter__ yields front -> back
+        try:
+            q.enqueue(None)
+            assert False, "None should be rejected"
+        except ValueError:
+            pass
+        while not q.is_empty():
+            q.dequeue()
+        try:
+            q.dequeue()
+            assert False, "expected QueueEmptyError on empty dequeue"
+        except QueueEmptyError:
+            pass
+
+    def array_queue_capacity_guard() -> None:
+        try:
+            ArrayQueue(0)
+            assert False, "capacity < 1 should raise"
+        except ValueError:
+            pass
+
+    def queue_abc_not_instantiable() -> None:
+        try:
+            Queue()                                 # type: ignore[abstract]
+            assert False, "abstract Queue should not instantiate"
+        except TypeError:
+            pass
+
+    def linked_queue_lifecycle() -> None:
+        q = LinkedListQueue()
+        assert q.is_empty() and len(q) == 0
+        for i in range(5):
+            q.enqueue(i)
+        assert len(q) == 5
+        assert q.peek_value() == 0                  # value at the front
+        node = q.dequeue()                          # dequeue returns the Node itself
+        assert node.data == 0 and len(q) == 4
+        assert q.to_array() == [1, 2, 3, 4]
+        assert list(q) == [1, 2, 3, 4]
+        while not q.is_empty():
+            q.dequeue()
+        assert q.head is None and q.tail is None    # draining clears both ends
+        try:
+            q.dequeue()
+            assert False, "expected QueueEmptyError on empty dequeue"
+        except QueueEmptyError:
+            pass
+
+    print("Queue self-tests:")
+    _check("ArrayQueue enqueue/dequeue/peek/resize/iter", array_queue_lifecycle)
+    _check("ArrayQueue capacity guard", array_queue_capacity_guard)
+    _check("Queue ABC not instantiable", queue_abc_not_instantiable)
+    _check("LinkedListQueue enqueue/dequeue/peek", linked_queue_lifecycle)

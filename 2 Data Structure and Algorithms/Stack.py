@@ -14,6 +14,8 @@ changes. Errors are specific (`StackEmptyError`, `StackFullError`) so callers
 can catch precisely instead of guarding on a bare `except`.
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Iterator
 
@@ -303,3 +305,71 @@ class LinkedStack(Stack):
     def is_empty(self) -> bool:
         """True when the stack holds no items. Time: O(1)."""
         return self.list.size == 0
+
+
+if __name__ == "__main__":
+    # Self-tests — run `python Stack.py`. Each case reports PASS / FAIL / ERROR.
+
+    def _check(name: str, case) -> None:
+        try:
+            case()
+            print(f"  PASS   {name}")
+        except AssertionError as exc:
+            print(f"  FAIL   {name}: {exc}")
+        except Exception as exc:                    # noqa: BLE001 - surface any error
+            print(f"  ERROR  {name}: {type(exc).__name__}: {exc}")
+
+    def array_stack_lifecycle() -> None:
+        s = ArrayStack(2)                           # small buffer forces resizes
+        assert s.is_empty() and len(s) == 0
+        for i in range(5):                          # 0..4 -> capacity grows 2 -> 4 -> 8
+            s.push(i)
+        assert len(s) == 5 and s.capacity >= 5
+        assert s.peek() == 4                        # LIFO: last in is on top
+        assert s.pop() == 4 and len(s) == 4
+        assert list(s) == [3, 2, 1, 0]             # __iter__ yields top -> bottom
+        while not s.is_empty():
+            s.pop()
+        try:
+            s.pop()
+            assert False, "expected StackEmptyError on empty pop"
+        except StackEmptyError:
+            pass
+
+    def array_stack_capacity_guard() -> None:
+        try:
+            ArrayStack(0)
+            assert False, "capacity < 1 should raise"
+        except ValueError:
+            pass
+
+    def stack_abc_not_instantiable() -> None:
+        try:
+            Stack()                                 # type: ignore[abstract]
+            assert False, "abstract Stack should not instantiate"
+        except TypeError:
+            pass
+
+    def linked_stack_lifecycle() -> None:
+        s = LinkedStack()
+        assert s.is_empty() and len(s) == 0
+        for i in range(5):
+            s.push(i)
+        assert len(s) == 5
+        assert s.peek_value() == 4                  # value at the top
+        assert s.pop_value() == 4 and len(s) == 4
+        node = s.pop()                              # pop returns the Node itself
+        assert node.data == 3 and len(s) == 3
+        while not s.is_empty():
+            s.pop_value()
+        try:
+            s.pop_value()
+            assert False, "expected an error on empty pop"
+        except (StackEmptyError, ValueError):
+            pass
+
+    print("Stack self-tests:")
+    _check("ArrayStack push/pop/peek/resize/iter", array_stack_lifecycle)
+    _check("ArrayStack capacity guard", array_stack_capacity_guard)
+    _check("Stack ABC not instantiable", stack_abc_not_instantiable)
+    _check("LinkedStack push/pop/peek", linked_stack_lifecycle)
