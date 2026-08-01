@@ -1,17 +1,18 @@
 # Data Structures & Algorithms
 
-Six structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; the last, `Stack`, is an abstract data type layered on top of them in two backings. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
+Seven structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; the last two, `Stack` and `Queue`, are abstract data types, each with two backings. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
 
 ## Contents
 
-| File                  | Structure                | Backing                               | Grows?                                      |
-| --------------------- | ------------------------ | ------------------------------------- | ------------------------------------------- |
-| `StaticArray.py`      | Static array             | Fixed-capacity slot list              | No — raises once full                       |
-| `DynamicArray.py`     | Dynamic array            | Resizable buffer                      | Yes — doubles/halves, amortized O(1) append |
-| `SinglyLinkedList.py` | Singly linked list       | `Node` with `.next` only              | Yes — unbounded                             |
-| `DoublyLinkedList.py` | Doubly linked list       | `Node` with `.next` and `.prev`       | Yes — unbounded                             |
-| `HashTable.py`        | Hash table (set of keys) | Prime-sized slot array / bucket lists | Yes — rehashes at 0.75 load factor          |
+| File                  | Structure                            | Backing                               | Grows?                                      |
+| --------------------- | ------------------------------------ | ------------------------------------- | ------------------------------------------- |
+| `StaticArray.py`      | Static array                         | Fixed-capacity slot list              | No — raises once full                       |
+| `DynamicArray.py`     | Dynamic array                        | Resizable buffer                      | Yes — doubles/halves, amortized O(1) append |
+| `SinglyLinkedList.py` | Singly linked list                   | `Node` with `.next` only              | Yes — unbounded                             |
+| `DoublyLinkedList.py` | Doubly linked list                   | `Node` with `.next` and `.prev`       | Yes — unbounded                             |
+| `HashTable.py`        | Hash table (set of keys)             | Prime-sized slot array / bucket lists | Yes — rehashes at 0.75 load factor          |
 | `Stack.py`            | Stack (LIFO), array- & linked-backed | Resizable buffer / singly linked list | Yes — array doubles; linked is unbounded    |
+| `Queue.py`            | Queue (FIFO), array- & linked-backed | Resizable buffer / singly linked list | Yes — array grows; linked is unbounded      |
 
 ---
 
@@ -63,6 +64,15 @@ One LIFO contract, two backings. `Stack` (an ABC) fixes the interface — `push`
 
 Errors are specific — `StackEmptyError` on an empty `pop`/`peek`, `StackFullError` reserved for a fixed-capacity variant — all under a `StackError` base, so callers catch precisely instead of a bare `except`. Because both stacks satisfy the same interface, any caller that depends on the contract works with either; swapping `ArrayStack` for `LinkedStack` changes nothing else.
 
+## Queue
+
+One FIFO contract, two backings. `Queue` (an ABC) fixes the interface — `enqueue`, `dequeue`, `peek`, `is_empty`, `size`, `clear`, `to_array`, `__str__` — and two classes implement it differently:
+
+- `ArrayQueue` — a resizable buffer with the front pinned at index 0. `enqueue` writes at index `size` and doubles the buffer when full (amortized O(1)); `dequeue` removes the front and shifts every remaining item down one slot, so it is O(n). Neither operation accepts `None`, so a `None` slot always means "empty".
+- `LinkedListQueue` — a singly linked list holding both `head` (front) and `tail` (back) pointers. `enqueue` links onto the tail and `dequeue` unlinks the head, both true O(1); it can never be "full". `dequeue`/`peek` hand back the `Node`; `peek_value` returns just the stored value.
+
+Errors are specific — `QueueEmptyError` on an empty `dequeue`/`peek` — under a `QueueError` base. Because both queues satisfy the same interface, any caller depending on the contract works with either: the array one trades an O(n) dequeue for cache-friendly contiguity, the linked one trades a pointer per node for true O(1) at both ends.
+
 ---
 
 ## Complexity
@@ -91,12 +101,21 @@ The 0.75 resize threshold and prime sizing are what keep the average at O(1); ad
 
 `Stack` is an ADT, not an indexed sequence, so like `HashTable` it gets its own line — every operation touches only the top:
 
-| Operation      | ArrayStack                          | LinkedStack     |
-| -------------- | ----------------------------------- | --------------- |
-| push           | O(1) amortized — doubles when full  | O(1)            |
-| pop            | O(1)                                | O(1)            |
-| peek           | O(1)                                | O(1)            |
-| Space overhead | unused buffer capacity              | 1 pointer/node  |
+| Operation      | ArrayStack                         | LinkedStack    |
+| -------------- | ---------------------------------- | -------------- |
+| push           | O(1) amortized — doubles when full | O(1)           |
+| pop            | O(1)                               | O(1)           |
+| peek           | O(1)                               | O(1)           |
+| Space overhead | unused buffer capacity             | 1 pointer/node |
+
+`Queue` is an ADT too — items enter at the back and leave from the front:
+
+| Operation      | ArrayQueue                         | LinkedListQueue |
+| -------------- | ---------------------------------- | --------------- |
+| enqueue        | O(1) amortized — doubles when full | O(1)            |
+| dequeue        | O(n) — shifts the rest down        | O(1)            |
+| peek           | O(1)                               | O(1)            |
+| Space overhead | unused buffer capacity             | 1 pointer/node  |
 
 ## Background reading
 

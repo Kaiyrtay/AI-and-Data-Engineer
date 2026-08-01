@@ -5,3 +5,4 @@ https://coderpad.io/blog/development/an-introduction-to-linked-list-data-structu
 https://medium.com/@noorfatimaafzalbutt/hashing-in-data-structures-and-algorithms-dsa-6f68dfbaec29
 https://www.kdkce.edu.in/pdf/YDC-4IT-ADS-Hashing%20Techniques.pdf
 https://medium.com/@moradi.sayyedali/stack-data-structure-3b2eca5f37ca
+https://medium.com/@SametAkgul/data-structures-v-what-is-queue-facd053699e
