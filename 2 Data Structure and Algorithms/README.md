@@ -78,13 +78,22 @@ Errors are specific — `QueueEmptyError` on an empty `dequeue`/`peek` — under
 
 A binary tree whose four traversals are swappable strategy classes. `Node` holds a value and `left`/`right` children; `Tree` owns the root and answers the structural questions — `height` (edges on the longest root→leaf path, −1 when empty), `depth` (edges from the root down to a given node, 0 at the root), and `degree` (a node's child count, 0–2).
 
+`Tree` also classifies its own shape (each O(n)):
+
+- `is_full` — every node has 0 or 2 children, never exactly 1.
+- `is_perfect` — full **and** every leaf sits at the same depth.
+- `is_complete` — every level full except the last, which fills left to right (tested with the array-index trick: a node at `i` has children at `2i+1`/`2i+2`).
+- `is_balanced` — left/right subtree heights differ by ≤ 1 at every node (one O(n) pass, using `-2` as an "unbalanced" sentinel).
+- `is_degenerate` — every node has at most one child; a chain that may switch sides (also called *pathological*).
+- `is_skewed` — a degenerate tree leaning entirely one way, i.e. `is_left_skewed` or `is_right_skewed`.
+
 The traversals sit behind a `TreeTraversal` ABC, so an order is chosen by picking a class rather than passing a flag, and a new order can be added without touching the tree:
 
 - `InorderTraversal` — left → node → right (yields sorted order on a BST).
 - `PreorderTraversal` — node → left → right (parent before its children).
 - `PostorderTraversal` — left → right → node (parent after both children).
 
-All three are recursive: O(n) time and O(h) call-stack space for height h. Node equality is structural (same value and same subtrees). Run `python Tree.py` for the built-in self-tests across the traversals plus `height`/`depth`/`degree`.
+All three are recursive: O(n) time and O(h) call-stack space for height h. Node equality is structural (same value and same subtrees). Run `python Tree.py` for the built-in self-tests across the traversals, `height`/`depth`/`degree`, and the shape predicates.
 
 ---
 

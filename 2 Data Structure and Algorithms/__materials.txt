@@ -9,3 +9,7 @@ https://medium.com/@SametAkgul/data-structures-v-what-is-queue-facd053699e
 https://www.programiz.com/dsa/trees
 https://www.programiz.com/dsa/tree-traversal
 https://www.programiz.com/dsa/binary-tree
+https://www.programiz.com/dsa/full-binary-tree
+https://www.programiz.com/dsa/perfect-binary-tree
+https://www.programiz.com/dsa/complete-binary-tree
+https://www.programiz.com/dsa/balanced-binary-tree

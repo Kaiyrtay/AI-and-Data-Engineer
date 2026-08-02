@@ -104,6 +104,97 @@ class Tree:
             raise TypeError("node must be a Node")
         return (node.left is not None) + (node.right is not None)
 
+    def is_full(self) -> bool:
+        """True if every node has 0 or 2 children (never exactly 1). Time: O(n)."""
+        return self._is_full(self.root)
+
+    def _is_full(self, node: Node | None) -> bool:
+        if node is None:
+            return True
+        if (node.left is None) != (node.right is None):
+            return False
+        return self._is_full(node.left) and self._is_full(node.right)
+
+    def is_perfect(self) -> bool:
+        """True if all internal nodes have 2 children and all leaves share one depth. Time: O(n)."""
+        return self._is_perfect(self.root, self.height(), 0)
+
+    def _is_perfect(self, node: Node | None, tree_height: int, depth: int) -> bool:
+        if node is None:
+            return True
+        if node.left is None and node.right is None:
+            return depth == tree_height
+        if node.left is None or node.right is None:
+            return False
+        return (self._is_perfect(node.left, tree_height, depth + 1)
+                and self._is_perfect(node.right, tree_height, depth + 1))
+
+    def is_degenerate(self) -> bool:
+        """True if every node has at most one child, either side (a chain). Also 'pathological'. Time: O(n)."""
+        return self._is_degenerate(self.root)
+
+    def _is_degenerate(self, node: Node | None) -> bool:
+        if node is None:
+            return True
+        if node.left is not None and node.right is not None:
+            return False
+        return self._is_degenerate(node.left) and self._is_degenerate(node.right)
+
+    def is_skewed(self) -> bool:
+        """True if degenerate and all children on one side (left- or right-skewed). Time: O(n)."""
+        return self._is_left_skewed() or self._is_right_skewed()
+
+    def _is_left_skewed(self) -> bool:
+        node = self.root
+        while node is not None:
+            if node.right is not None:
+                return False
+            node = node.left
+        return True
+
+    def _is_right_skewed(self) -> bool:
+        node = self.root
+        while node is not None:
+            if node.left is not None:
+                return False
+            node = node.right
+        return True
+
+    def is_complete(self) -> bool:
+        """True if every level is full except the last, filled left to right. Time: O(n)."""
+        return self._is_complete(self.root, 0, self._count(self.root))
+
+    def _count(self, node: Node | None) -> int:
+        if node is None:
+            return 0
+        return 1 + self._count(node.left) + self._count(node.right)
+
+    def _is_complete(self, node: Node | None, index: int, count: int) -> bool:
+        if node is None:
+            return True
+        if index >= count:
+            return False
+        return (self._is_complete(node.left, 2 * index + 1, count)
+                and self._is_complete(node.right, 2 * index + 2, count))
+
+    def is_balanced(self) -> bool:
+        """True if left/right subtree heights differ by <= 1 at every node. Time: O(n)."""
+        return self._balanced_height(self.root) != -2
+
+    def _balanced_height(self, node: Node | None) -> int:
+        """Height of node, or -2 as a sentinel once any subtree is unbalanced."""
+        if node is None:
+            return -1
+        left = self._balanced_height(node.left)
+        if left == -2:
+            return -2
+        right = self._balanced_height(node.right)
+        if right == -2:
+            return -2
+        if abs(left - right) > 1:
+            return -2
+        return 1 + max(left, right)
+
 
 class TreeTraversal(ABC):
     """The contract for a traversal strategy — one order per subclass."""
