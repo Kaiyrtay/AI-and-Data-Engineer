@@ -1,6 +1,6 @@
 # Data Structures & Algorithms
 
-Seven structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; the last two, `Stack` and `Queue`, are abstract data types, each with two backings. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
+Eight structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; then `Stack` and `Queue` are abstract data types with two backings each, and `Tree` is a binary tree with its traversals as strategy classes. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
 
 ## Contents
 
@@ -13,6 +13,7 @@ Seven structures, built from scratch in pure Python — no wrapping `list`, `dic
 | `HashTable.py`        | Hash table (set of keys)             | Prime-sized slot array / bucket lists | Yes — rehashes at 0.75 load factor          |
 | `Stack.py`            | Stack (LIFO), array- & linked-backed | Resizable buffer / singly linked list | Yes — array doubles; linked is unbounded    |
 | `Queue.py`            | Queue (FIFO), array- & linked-backed | Resizable buffer / singly linked list | Yes — array grows; linked is unbounded      |
+| `trees/Tree.py`       | Binary tree + traversals             | `Node` with `.left` / `.right`        | Yes — unbounded                             |
 
 ---
 
@@ -73,6 +74,18 @@ One FIFO contract, two backings. `Queue` (an ABC) fixes the interface — `enque
 
 Errors are specific — `QueueEmptyError` on an empty `dequeue`/`peek` — under a `QueueError` base. Because both queues satisfy the same interface, any caller depending on the contract works with either: the array one trades an O(n) dequeue for cache-friendly contiguity, the linked one trades a pointer per node for true O(1) at both ends.
 
+## Tree
+
+A binary tree whose four traversals are swappable strategy classes. `Node` holds a value and `left`/`right` children; `Tree` owns the root and answers the structural questions — `height` (edges on the longest root→leaf path, −1 when empty), `depth` (edges from the root down to a given node, 0 at the root), and `degree` (a node's child count, 0–2).
+
+The traversals sit behind a `TreeTraversal` ABC, so an order is chosen by picking a class rather than passing a flag, and a new order can be added without touching the tree:
+
+- `InorderTraversal` — left → node → right (yields sorted order on a BST).
+- `PreorderTraversal` — node → left → right (parent before its children).
+- `PostorderTraversal` — left → right → node (parent after both children).
+
+All three are recursive: O(n) time and O(h) call-stack space for height h. Node equality is structural (same value and same subtrees). Run `python Tree.py` for the built-in self-tests across the traversals plus `height`/`depth`/`degree`.
+
 ---
 
 ## Complexity
@@ -116,6 +129,15 @@ The 0.75 resize threshold and prime sizing are what keep the average at O(1); ad
 | dequeue        | O(n) — shifts the rest down        | O(1)            |
 | peek           | O(1)                               | O(1)            |
 | Space overhead | unused buffer capacity             | 1 pointer/node  |
+
+`Tree`'s traversals visit every node, and its structural queries walk the tree:
+
+| Operation               | Binary tree           |
+| ----------------------- | --------------------- |
+| Traversal (in/pre/post) | O(n) time, O(h) stack |
+| height                  | O(n)                  |
+| depth                   | O(n)                  |
+| degree                  | O(1)                  |
 
 ## Background reading
 
