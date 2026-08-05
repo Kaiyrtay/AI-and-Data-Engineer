@@ -13,3 +13,6 @@ https://www.programiz.com/dsa/full-binary-tree
 https://www.programiz.com/dsa/perfect-binary-tree
 https://www.programiz.com/dsa/complete-binary-tree
 https://www.programiz.com/dsa/balanced-binary-tree
+https://www.programiz.com/dsa/binary-search-tree
+https://medium.com/@noorfatimaafzalbutt/binary-search-tree-bst-a-complete-guide-b373440ac7f5
+https://algomaster.io/learn/dsa/bst-introduction

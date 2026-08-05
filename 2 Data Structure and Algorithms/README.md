@@ -1,6 +1,6 @@
 # Data Structures & Algorithms
 
-Eight structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; then `Stack` and `Queue` are abstract data types with two backings each, and `Tree` is a binary tree with its traversals as strategy classes. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
+Nine structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; then `Stack` and `Queue` are abstract data types with two backings each, and `Tree` and `BST` are binary trees — `Tree` centered on traversals, `BST` on ordered insert/search/delete. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
 
 ## Contents
 
@@ -14,6 +14,7 @@ Eight structures, built from scratch in pure Python — no wrapping `list`, `dic
 | `Stack.py`            | Stack (LIFO), array- & linked-backed | Resizable buffer / singly linked list | Yes — array doubles; linked is unbounded    |
 | `Queue.py`            | Queue (FIFO), array- & linked-backed | Resizable buffer / singly linked list | Yes — array grows; linked is unbounded      |
 | `trees/Tree.py`       | Binary tree + traversals             | `Node` with `.left` / `.right`        | Yes — unbounded                             |
+| `trees/BST.py`        | Binary search tree                   | `Node` with `.left` / `.right`        | Yes — unbounded                             |
 
 ---
 
@@ -95,6 +96,14 @@ The traversals sit behind a `TreeTraversal` ABC, so an order is chosen by pickin
 
 All three are recursive: O(n) time and O(h) call-stack space for height h. Node equality is structural (same value and same subtrees). Run `python Tree.py` for the built-in self-tests across the traversals, `height`/`depth`/`degree`, and the shape predicates.
 
+## BST
+
+A binary search tree of integers holding the ordering invariant *left subtree < node < right subtree*; duplicate keys are ignored. `Node` carries a value and validated `left`/`right` children; `BST` tracks `root` and `size`.
+
+The core operations — `insert`, `search`, `delete` — come in both iterative and recursive forms, each O(h). `delete` covers the three cases: a leaf (unlinked), one child (spliced out), and two children (the value is replaced by its in-order successor, which is then removed). Alongside them are `_successor_node`/`_predecessor_node` (each returning `[parent, node]` for the two-child delete), `min_value`/`max_value`, and `height`/`depth`.
+
+All four traversals are built in — `preorder`, `inorder` (sorted output on a BST), `postorder` (depth-first), and `level_order` (breadth-first). It behaves like a native container via `__len__`, `__contains__`, `__iter__` (in-order), `__eq__` (structural tree equality), and `__repr__`/`__str__`. Run `python BST.py` for the built-in self-tests covering insert/search, all three delete shapes, the traversals, min/max, height/depth, equality, and empty-tree edges.
+
 ---
 
 ## Complexity
@@ -147,6 +156,14 @@ The 0.75 resize threshold and prime sizing are what keep the average at O(1); ad
 | height                  | O(n)                  |
 | depth                   | O(n)                  |
 | degree                  | O(1)                  |
+
+`BST` operations follow the tree's height h — O(log n) when balanced, O(n) when skewed:
+
+| Operation                | Average  | Worst case (skewed) |
+| ------------------------ | -------- | ------------------- |
+| insert / search / delete | O(log n) | O(n)                |
+| min / max                | O(log n) | O(n)                |
+| Traversal (any order)    | O(n)     | O(n)                |
 
 ## Background reading
 
