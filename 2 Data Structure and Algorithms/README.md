@@ -1,6 +1,6 @@
 # Data Structures & Algorithms
 
-Nine structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; then `Stack` and `Queue` are abstract data types with two backings each, and `Tree` and `BST` are binary trees — `Tree` centered on traversals, `BST` on ordered insert/search/delete. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
+Ten structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; then `Stack` and `Queue` are abstract data types with two backings each, and `Tree`, `BST`, and `AVL` are binary trees — `Tree` centered on traversals, `BST` on ordered insert/search/delete, and `AVL` a self-balancing BST. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
 
 ## Contents
 
@@ -15,6 +15,7 @@ Nine structures, built from scratch in pure Python — no wrapping `list`, `dict
 | `Queue.py`            | Queue (FIFO), array- & linked-backed | Resizable buffer / singly linked list | Yes — array grows; linked is unbounded      |
 | `trees/Tree.py`       | Binary tree + traversals             | `Node` with `.left` / `.right`        | Yes — unbounded                             |
 | `trees/BST.py`        | Binary search tree                   | `Node` with `.left` / `.right`        | Yes — unbounded                             |
+| `trees/AVL.py`        | Self-balancing BST (AVL)             | `Node` with `.left` / `.right` + height | Yes — unbounded                           |
 
 ---
 
@@ -104,6 +105,18 @@ The core operations — `insert`, `search`, `delete` — come in both iterative 
 
 All four traversals are built in — `preorder`, `inorder` (sorted output on a BST), `postorder` (depth-first), and `level_order` (breadth-first). It behaves like a native container via `__len__`, `__contains__`, `__iter__` (in-order), `__eq__` (structural tree equality), and `__repr__`/`__str__`. Run `python BST.py` for the built-in self-tests covering insert/search, all three delete shapes, the traversals, min/max, height/depth, equality, and empty-tree edges.
 
+## AVL
+
+A **self-balancing** BST — the answer to the plain BST's flaw, where sorted input skews it into a linked list and everything degrades to O(n). An `AVL` holds the same ordering as a BST but adds one invariant: **every node's balance factor stays within [−1, 1]**. After each insert or delete it rebalances on the way back up, so its height stays ~log n and search / insert / delete are all O(log n) *even on already-sorted input*.
+
+The machinery:
+
+- Each `Node` **caches its own height**, so a balance-factor check is O(1) (`_node_height`, `_update_height`, `_balance_factor`).
+- `_rotate_left` / `_rotate_right` are the two primitive fixes; `_rebalance` picks the right one of the four cases (LL / RR / LR / RL) from a node's balance factor and its heavy child's.
+- `insert` and `delete` are recursive — the call stack *is* the path back up, so `return self._rebalance(node)` fires at every ancestor, updating heights and rotating where needed. Delete reuses the in-order successor for the two-child case, same as the BST.
+
+It carries the full BST surface too — `search` (O(log n)), `DFS`/`BFS` search, `min_value`/`max_value`, all four traversals, `height`/`depth`. Run `python AVL.py` for the self-tests, which insert 1…15 ascending *and* descending (the exact input that skews a plain BST) and assert the tree stays balanced with height ≤ 4, plus balanced-through-deletes, duplicates ignored, and empty-tree edges.
+
 ---
 
 ## Complexity
@@ -164,6 +177,15 @@ The 0.75 resize threshold and prime sizing are what keep the average at O(1); ad
 | insert / search / delete | O(log n) | O(n)                |
 | min / max                | O(log n) | O(n)                |
 | Traversal (any order)    | O(n)     | O(n)                |
+
+`AVL` is a BST whose balancing removes the worst case — the height is bounded at ~1.44·log n, so there is no "skewed" column:
+
+| Operation                | Guaranteed |
+| ------------------------ | ---------- |
+| insert / search / delete | O(log n)   |
+| min / max                | O(log n)   |
+| rotation / balance check | O(1)       |
+| Traversal (any order)    | O(n)       |
 
 ## Background reading
 
