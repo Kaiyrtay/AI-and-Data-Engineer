@@ -1,6 +1,6 @@
 # Data Structures & Algorithms
 
-Ten structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; then `Stack` and `Queue` are abstract data types with two backings each, and `Tree`, `BST`, and `AVL` are binary trees — `Tree` centered on traversals, `BST` on ordered insert/search/delete, and `AVL` a self-balancing BST. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
+Twelve structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; then `Stack` and `Queue` are abstract data types with two backings each; `Tree`, `BST`, and `AVL` are binary trees — `Tree` centered on traversals, `BST` on ordered insert/search/delete, and `AVL` a self-balancing BST; and `BTree` and `BPlusTree` are multi-way search trees, where each node holds many keys and many children so the tree stays short and wide — the shape databases and filesystems index with. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
 
 ## Contents
 
@@ -16,6 +16,8 @@ Ten structures, built from scratch in pure Python — no wrapping `list`, `dict`
 | `trees/Tree.py`       | Binary tree + traversals             | `Node` with `.left` / `.right`        | Yes — unbounded                             |
 | `trees/BST.py`        | Binary search tree                   | `Node` with `.left` / `.right`        | Yes — unbounded                             |
 | `trees/AVL.py`        | Self-balancing BST (AVL)             | `Node` with `.left` / `.right` + height | Yes — unbounded                           |
+| `trees/B.py`          | B-tree (multi-way search tree)       | Node of sorted keys + child links       | Yes — splits/merges, all leaves one depth |
+| `trees/B+.py`         | B+ tree (keys in linked leaves)      | Internal separators + linked leaf chain | Yes — splits/merges, leaves chained       |
 
 ---
 
@@ -117,6 +119,22 @@ The machinery:
 
 It carries the full BST surface too — `search` (O(log n)), `DFS`/`BFS` search, `min_value`/`max_value`, all four traversals, `height`/`depth`. Run `python AVL.py` for the self-tests, which insert 1…15 ascending *and* descending (the exact input that skews a plain BST) and assert the tree stays balanced with height ≤ 4, plus balanced-through-deletes, duplicates ignored, and empty-tree edges.
 
+## B-tree
+
+A **B-tree** is the multi-way generalization of the BST: instead of one key and two children per node, each node holds a sorted run of keys and one more child than it has keys, so the tree grows wide and stays shallow. That high fan-out is the whole point — on disk or across a cache line, lookup cost is dominated by how many *nodes* you touch, and a fat node means far fewer touches. `BTree` is parametrized by a **minimum degree** `minimum_degree` (≥ 2): every node except the root holds between `minimum_degree − 1` and `2·minimum_degree − 1` keys, every internal node has between `minimum_degree` and `2·minimum_degree` children, and — the invariant that makes it a B-tree — **all leaves sit at exactly the same depth**. Duplicate keys are ignored. (A node's keys and child links live in plain Python lists; a B-tree node *is* a small sorted array by definition, so this is the one place a list is used structurally rather than as a scratch buffer.)
+
+Growth happens top-down by **proactive splitting**: on the way down to insert, any full child is split first — its median key rises into the parent and the node halves — so a parent is never full when its child splits, and the tree grows only by pushing a key up, occasionally lifting the root by one level. Deletion is the mirror image and the fiddly part: before descending into a child that holds only the minimum `minimum_degree − 1` keys, `_fill` first **borrows** a key from a neighbouring sibling (rotating it through the parent) or, if neither sibling can spare one, **merges** the child, a separator, and a sibling back into a single node. Deleting a key that sits in an internal node replaces it with its in-order predecessor or successor drawn from a child that can spare one, falling back to a merge — the same three cases as the BST delete, one level richer.
+
+Beyond `insert` / `search` (returning `(node, position)`) / `delete`, it carries `min_value`, `max_value`, `height` (all leaves share it, so it's a single walk down the left spine), an `inorder` that yields every key sorted, a `level_order` grouped one list per node, and the container dunders (`__len__`, `__contains__`, `__iter__` in sorted order, structural `__eq__`, `__repr__`/`__str__`). Run `python B.py` for the self-tests — sorted inserts, duplicate handling, both delete shapes, shallow height on 99 keys, empty-tree edges, and a randomized 30 × 400-operation stress test that re-checks every B-tree invariant after each op.
+
+## B+ tree
+
+A **B+ tree** is a B-tree tuned for range scans, and it is what most database indexes and filesystems actually run on. Two changes from `B.py`: **all keys live in the leaves** — internal nodes hold only *separators*, routing keys that say "≥ this goes right," never the data itself, so a value can appear once as a leaf key and again as a separator above it; and **the leaves are chained** — each leaf points to the next, so once you descend to the start of a range you walk the leaf list straight through instead of climbing back up. That chain is exactly why `range_query(low, high)` and a full in-order iteration are simple left-to-right scans here, running in O(log n + k) for k hits.
+
+`BPlusTree` is parametrized by `order` (≥ 3), the maximum children an internal node may have (so a leaf holds up to `order − 1` keys). Insert is recursive and **bottom-up**: it walks to the correct leaf, drops the key in, and if the node overflows it splits and hands a separator back up to the parent, which may split in turn — a leaf split *copies* its middle key up (the key still lives in the leaf), while an internal split *moves* its median up (as in a plain B-tree). Delete removes from the leaf, then repairs underflow on the way back up by borrowing from a sibling or merging — keeping every non-root leaf at ≥ `order // 2` keys, every non-root internal node at ≥ ⌈`order` ∕ 2⌉ children, and the leaf chain intact across a merge.
+
+The surface mirrors the B-tree — `search` (always descends to a leaf), `min_value`, `max_value`, `height`, `level_order`, `__iter__` walking the leaf chain in sorted order — plus `range_query` and a `keys()` convenience. The behavioural contrast worth internalizing: in a B-tree a search can stop early at an internal node, but in a B+ tree every search runs all the way to a leaf; you trade that for dramatically cheaper ranges. Run `python "B+.py"` for the self-tests — sorted inserts, reverse-insert leaf-chain order, `range_query` cases, borrow-and-merge deletes, empty-tree edges, and the same randomized 30 × 400-operation invariant stress test, with random range queries checked against a reference set.
+
 ---
 
 ## Complexity
@@ -187,6 +205,25 @@ The 0.75 resize threshold and prime sizing are what keep the average at O(1); ad
 | rotation / balance check | O(1)       |
 | Traversal (any order)    | O(n)       |
 
+`BTree`'s height is Θ(log n) *guaranteed* — every leaf sits at the same depth — and the cost inside each node is a scan of up to `2·minimum_degree − 1` keys:
+
+| Operation                | Guaranteed                  |
+| ------------------------ | --------------------------- |
+| search / insert / delete | O(minimum_degree · log n)   |
+| min / max                | O(log n)                    |
+| split / borrow / merge   | O(minimum_degree)           |
+| inorder / level_order    | O(n)                        |
+
+`BPlusTree` matches it and adds the operation it exists for — a range scan that pays log n to find the start, then walks the leaf chain:
+
+| Operation                 | Guaranteed       |
+| ------------------------- | ---------------- |
+| search / insert / delete  | O(order · log n) |
+| range_query (k hits)      | O(log n + k)     |
+| min / max                 | O(log n)         |
+| split / borrow / merge    | O(order)         |
+| iterate all / level_order | O(n)             |
+
 ## Background reading
 
-Reference links used while building these live in `__materials.txt` — arrays (static vs. dynamic, RAM storage) and linked list fundamentals.
+Reference links used while building these live in `__materials.txt` — from arrays (static vs. dynamic, RAM storage) and linked-list fundamentals through to the B-tree, the B+ tree, and a B-tree-vs-B+-tree comparison.

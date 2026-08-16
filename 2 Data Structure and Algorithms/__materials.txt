@@ -19,3 +19,6 @@ https://algomaster.io/learn/dsa/bst-introduction
 https://algomaster.io/learn/dsa/avl-tree
 https://www.geeksforgeeks.org/dsa/insertion-in-an-avl-tree/
 https://www.programiz.com/dsa/avl-tree
+https://www.programiz.com/dsa/b-tree
+https://www.programiz.com/dsa/b-plus-tree
+https://unstop.com/blog/difference-between-b-tree-and-b-plus-tree
