@@ -22,3 +22,4 @@ https://www.programiz.com/dsa/avl-tree
 https://www.programiz.com/dsa/b-tree
 https://www.programiz.com/dsa/b-plus-tree
 https://unstop.com/blog/difference-between-b-tree-and-b-plus-tree
+https://realpython.com/python-data-structures/#conclusion-python-data-structures
