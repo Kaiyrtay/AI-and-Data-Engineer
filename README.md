@@ -7,7 +7,7 @@ A self-directed path toward AI/data engineering that starts from solid software 
 | Folder                                                                                    | Focus                                                        |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | [`1 Python OOP/`](./1%20Python%20OOP/README.md)                                           | Classes → inheritance → SOLID design → two capstone projects |
-| [`2 Data Structure and Algorithms/`](./2%20Data%20Structure%20and%20Algorithms/README.md) | Arrays and linked lists, built from scratch                  |
+| [`2 Data Structure and Algorithms/`](./2%20Data%20Structure%20and%20Algorithms/README.md) | Arrays, linked lists, hash table, stacks & queues, trees, heap, and trie — from scratch                  |
 
 Each folder has its own README with a full breakdown of what's inside.
 

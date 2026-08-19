@@ -25,3 +25,4 @@ https://unstop.com/blog/difference-between-b-tree-and-b-plus-tree
 https://realpython.com/python-data-structures/#conclusion-python-data-structures
 https://www.programiz.com/dsa/heap-data-structure
 https://algomaster.io/learn/dsa/heaps-introduction
+https://algomaster.io/learn/dsa/tries-introduction

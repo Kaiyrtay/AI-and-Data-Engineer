@@ -1,6 +1,6 @@
 # Data Structures & Algorithms
 
-Twelve structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; then `Stack` and `Queue` are abstract data types with two backings each; `Tree`, `BST`, and `AVL` are binary trees — `Tree` centered on traversals, `BST` on ordered insert/search/delete, and `AVL` a self-balancing BST; and `BTree` and `BPlusTree` are multi-way search trees, where each node holds many keys and many children so the tree stays short and wide — the shape databases and filesystems index with. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
+Fourteen structures, built from scratch in pure Python — no wrapping `list`, `dict`, or `collections` internally. The first five are containers; then `Stack` and `Queue` are abstract data types with two backings each; `Tree`, `BST`, and `AVL` are binary trees — `Tree` centered on traversals, `BST` on ordered insert/search/delete, and `AVL` a self-balancing BST; and `BTree` and `BPlusTree` are multi-way search trees, where each node holds many keys and many children so the tree stays short and wide — the shape databases and filesystems index with; `Heap` is a complete binary tree packed into a flat array — a priority queue whose root is always the min or max; and `Trie` is a prefix tree that stores strings by their path, sharing common prefixes. Each implements the Python dunder methods that fit its shape (`__len__`, `__iter__`, `__contains__`, `__eq__`, `__str__`, `__repr__`, plus `__getitem__`/`__setitem__` on the indexed sequences) so it behaves like a native container, not a toy class.
 
 ## Contents
 
@@ -18,6 +18,8 @@ Twelve structures, built from scratch in pure Python — no wrapping `list`, `di
 | `trees/AVL.py`        | Self-balancing BST (AVL)             | `Node` with `.left` / `.right` + height | Yes — unbounded                           |
 | `trees/B.py`          | B-tree (multi-way search tree)       | Node of sorted keys + child links       | Yes — splits/merges, all leaves one depth |
 | `trees/B+.py`         | B+ tree (keys in linked leaves)      | Internal separators + linked leaf chain | Yes — splits/merges, leaves chained       |
+| `trees/Heap.py`       | Binary heap (min & max)              | Flat `list`, complete-tree indexing     | Yes — push/pop; O(n) heapify              |
+| `trees/Trie.py`       | Trie (prefix tree): set or word→value map | `TrieNode` with children `dict` + end flag | Yes — one node per new character       |
 
 ---
 
@@ -135,6 +137,14 @@ A **B+ tree** is a B-tree tuned for range scans, and it is what most database in
 
 The surface mirrors the B-tree — `search` (always descends to a leaf), `min_value`, `max_value`, `height`, `level_order`, `__iter__` walking the leaf chain in sorted order — plus `range_query` and a `keys()` convenience. The behavioural contrast worth internalizing: in a B-tree a search can stop early at an internal node, but in a B+ tree every search runs all the way to a leaf; you trade that for dramatically cheaper ranges. Run `python "B+.py"` for the self-tests — sorted inserts, reverse-insert leaf-chain order, `range_query` cases, borrow-and-merge deletes, empty-tree edges, and the same randomized 30 × 400-operation invariant stress test, with random range queries checked against a reference set.
 
+## Heap
+
+A **binary heap** is a *complete* binary tree packed into a flat array — no nodes, no pointers — where a node at index `i` finds its children at `2i+1` / `2i+2`, the same index trick `Tree.is_complete` uses. One contract, two orderings: `Heap` (an ABC) owns the array, `push` / `pop` / `peek`, the O(n) `_heapify` build, and the two loops that do all the real work — `_sift_up` (bubble a fresh leaf up) and `_sift_down` (sink a displaced root down); each subclass supplies only `_higher`, so `MinHeap` roots the smallest and `MaxHeap` the largest. The heap property is *partial* — every parent beats its children, siblings unordered — which is exactly why the min/max is O(1) to read and O(log n) to maintain, but the structure cannot search or iterate in sorted order (`__iter__` yields array order; drain with `pop` for sorted). A standalone `heapsort` reuses the sift-down as an in-place O(n log n) sort. Errors are specific — `HeapEmptyError` under a `HeapError` base on an empty `pop`/`peek`. Run `python Heap.py` for the self-tests — min/max ordering, O(n) heapify, empty-heap edges, and `heapsort` against `sorted()`.
+
+## Trie
+
+A **trie** (prefix tree) stores strings by their *path*, not by a value in any one node. Each `TrieNode` holds only a `children` dict (character → next node), an `is_end` flag, an optional `value`, and a cached subtree `count` — never its own letter (that is the key in its parent's dict) or its word (that is the path from the root), so every lookup starts at the root and follows one dict entry per character. Words that begin the same share nodes (`desk` / `desktop`); words that only end the same do not (`desktop` / `stop` split at the root). It doubles as a set of words and a word→value map: `insert` / `__setitem__`, `search`, `get` / `__getitem__` (KeyError when absent), `starts_with`, `count_prefix` (O(L) via the cached counts), `longest_prefix_of`, `words_with_prefix` / `items_with_prefix` for autocomplete, and a `delete` that prunes dead nodes back up to the first still-needed one — so deleting `desktop` keeps `desk`. A `pretty()` renders every node as text. Every core operation is O(L) in the key length L, independent of how many words are stored. Input is guarded with `TypeError` / `ValueError`; run `python Trie.py` for the `_check`-harness self-tests, including a randomized 30 × 400-operation stress test against a reference `dict`.
+
 ---
 
 ## Complexity
@@ -223,6 +233,28 @@ The 0.75 resize threshold and prime sizing are what keep the average at O(1); ad
 | min / max                 | O(log n)         |
 | split / borrow / merge    | O(order)         |
 | iterate all / level_order | O(n)             |
+
+`Heap` reads the extreme in constant time and maintains it in log n; it is not built for search:
+
+| Operation              | Guaranteed           |
+| ---------------------- | -------------------- |
+| peek (min / max)       | O(1)                 |
+| push                   | O(log n)             |
+| pop                    | O(log n)             |
+| heapify (build from n) | O(n)                 |
+| search / contains      | O(n)                 |
+| heapsort               | O(n log n), in-place |
+
+`Trie` costs scale with the key length L, never with the number of stored words N:
+
+| Operation                        | Guaranteed             |
+| -------------------------------- | ---------------------- |
+| insert / search / get / delete   | O(L)                   |
+| starts_with / count_prefix       | O(L)                   |
+| longest_prefix_of                | O(len(text))           |
+| words_with_prefix (k chars under) | O(L + k)              |
+| len                              | O(1)                   |
+| iterate all                      | O(total characters)    |
 
 ## Background reading
 
