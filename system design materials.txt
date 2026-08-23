@@ -1,3 +1,0 @@
-##################### System Design #####################
-https://algomaster.io/learn/system-design/what-is-system-design
-https://algomaster.io/learn/system-design/top-30-system-design-concepts

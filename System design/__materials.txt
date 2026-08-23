@@ -1,0 +1,9 @@
+##################### System Design #####################
+https://algomaster.io/learn/system-design/what-is-system-design
+https://algomaster.io/learn/system-design/top-30-system-design-concepts
+##################### Core Concepts #####################
+https://algomaster.io/learn/system-design/scalability
+https://algomaster.io/learn/system-design/availability
+https://algomaster.io/learn/system-design/reliability
+https://algomaster.io/learn/system-design/load-balancers
+https://algomaster.io/learn/system-design/load-balancing-algorithms
